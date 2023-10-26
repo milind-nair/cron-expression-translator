@@ -7,35 +7,64 @@ function translateSpringCronExpression(expression) {
     "month",
     "day of the week",
   ];
+  function getNumberSuffix(number) {
+    if (typeof number !== "number" || isNaN(number)) {
+      return "Invalid input";
+    }
+
+    const lastDigit = number % 10;
+    const lastTwoDigits = number % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
+      return "th";
+    }
+
+    switch (lastDigit) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+    }
+  }
+
   const cronFieldDescriptions = [];
   const cronFields = expression.split(" ");
   console.log(cronFields);
   function handleAsterisk(fieldName) {
-    // console.log(fieldName);
-    fieldName.push(`every ${fieldName[0]}`);
-    // console.log(fieldName);
+    fieldName.push(`Every ${fieldName[0]}`);
   }
 
   function handleRange(rangeStr, fieldName) {
     const [start, end] = rangeStr.split("-");
-    fieldName.push(`from ${start} to ${end} ${fieldName[0]}`);
+    fieldName.push(
+      `From the ${start}${getNumberSuffix(
+        parseInt(start)
+      )} to ${end}${getNumberSuffix(parseInt(end))} ${fieldName[0]}`
+    );
   }
 
   function handleStep(field, fieldName) {
-    console.log(field);
-    console.log(fieldName);
     const [range, step] = field.split("/");
-    fieldName.push(`every ${step} ${fieldName[0]}`);
+    fieldName.push(`Every ${step} ${fieldName[0]}s`);
     if (range.includes("-")) {
       handleRange(range, fieldName);
     }
+  }
+  function handleNumeric(field, fieldName) {
+    fieldName.push(
+      `${field}${getNumberSuffix(parseInt(field))} ${fieldName[0]}`
+    );
   }
 
   for (let i = 0; i < 6; i++) {
     const field = cronFields[i];
     const fieldName = [cronFieldNames[i]];
-
-    if (field === "*") {
+    let exclude = false;
+    if (field === "*"||field==="?") {
       handleAsterisk(fieldName);
     } else if (field.includes("/")) {
       handleStep(field, fieldName);
@@ -51,14 +80,15 @@ function translateSpringCronExpression(expression) {
           fieldName.push(value);
         }
       });
-    } 
-    // TODO: Handle if the field is numeric
-    else {
-      fieldName.push(field);
+    } else {
+      handleNumeric(field, fieldName);
+      if (parseInt(field) === 0) exclude = true;
     }
-
-    fieldName[0] = fieldName.slice(1).join(" ");
-    cronFieldDescriptions.push(fieldName[0]);
+    console.log(fieldName);
+    if (!exclude) {
+      fieldName[0] = fieldName.slice(1).join(" ");
+      cronFieldDescriptions.push(fieldName[0]);
+    }
   }
 
   const description = cronFieldDescriptions.join(", ");
@@ -67,6 +97,12 @@ function translateSpringCronExpression(expression) {
 }
 
 // Example usage:
-const cronExpression = "0 0 8-10/1 * * *"; // Sample Spring cron expression
+const cronExpression = "0 0 6,19 25 12 *"; // Sample Spring cron expression
 const humanReadable = translateSpringCronExpression(cronExpression);
 console.log(humanReadable); // Output the human-readable description
+
+// TODO :
+// Fix L character issues : 
+// The "day of month" and "day of week" fields can contain a L-character, which stands for "last", and has a different meaning in each field:
+// In the "day of month" field, L stands for "the last day of the month". If followed by an negative offset (i.e. L-n), it means "nth-to-last day of the month". If followed by W (i.e. LW), it means "the last weekday of the month".
+// In the "day of week" field, dL or DDDL stands for "the last day of week d (or DDD) in the month".
