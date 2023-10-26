@@ -49,7 +49,8 @@ function translateSpringCronExpression(expression) {
 
   function handleStep(field, fieldName) {
     const [range, step] = field.split("/");
-    fieldName.push(`Every ${step} ${fieldName[0]}s`);
+    if (parseInt(step) !== 1) fieldName.push(`Every ${step} ${fieldName[0]}s`);
+    else fieldName.push(`Every ${fieldName[0]}`);
     if (range.includes("-")) {
       handleRange(range, fieldName);
     }
@@ -64,7 +65,7 @@ function translateSpringCronExpression(expression) {
     const field = cronFields[i];
     const fieldName = [cronFieldNames[i]];
     let exclude = false;
-    if (field === "*"||field==="?") {
+    if (field === "*" || field === "?") {
       handleAsterisk(fieldName);
     } else if (field.includes("/")) {
       handleStep(field, fieldName);
@@ -97,12 +98,12 @@ function translateSpringCronExpression(expression) {
 }
 
 // Example usage:
-const cronExpression = "0 0 6,19 25 12 *"; // Sample Spring cron expression
+const cronExpression = "0 0 8-10/1 * * *"; // Sample Spring cron expression
 const humanReadable = translateSpringCronExpression(cronExpression);
 console.log(humanReadable); // Output the human-readable description
 
 // TODO :
-// Fix L character issues : 
+// Fix L character issues :
 // The "day of month" and "day of week" fields can contain a L-character, which stands for "last", and has a different meaning in each field:
 // In the "day of month" field, L stands for "the last day of the month". If followed by an negative offset (i.e. L-n), it means "nth-to-last day of the month". If followed by W (i.e. LW), it means "the last weekday of the month".
 // In the "day of week" field, dL or DDDL stands for "the last day of week d (or DDD) in the month".
