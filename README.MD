@@ -9,6 +9,8 @@ import translateSpringCronExpression from cron-expression-translator;
 const inputCronString = "0 0 8-10/1 * * *";
 
 const humanReadableText = translateSpringCronExpression(inputCronString);
+
+// sample output : Every hour From the 8th to 10th hour, Every day of the month, Every month, Every day of the week
 ```
 
 # About Spring Cron
