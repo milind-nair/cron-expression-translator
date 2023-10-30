@@ -61,6 +61,42 @@ function translateSpringCronExpression(expression) {
     );
   }
 
+  function offsetToText(offset) {
+    if (offset === 1 || offset === -1) return "the last";
+    if (offset > 1) return `the ${offset}th-to-last`;
+    return offset;
+  }
+
+  function handleMonth(dayOfMonth) {
+    let dayOfMonthText = "";
+    if (dayOfMonth === "L") {
+      dayOfMonthText = "the last day of the month";
+    } else if (dayOfMonth.startsWith("L-")) {
+      const offset = offsetToText(-parseInt(dayOfMonth.substring(2)));
+      dayOfMonthText = `${offset} day of the month from the end`;
+    } else if (dayOfMonth === "LW") {
+      dayOfMonthText = "the last weekday of the month";
+    } else {
+      dayOfMonthText = parseInt(dayOfMonth);
+    }
+    return dayOfMonthText;
+  }
+
+  function handleWeek(dayOfWeek) {
+    let dayOfWeekText = "";
+    if (dayOfWeek.startsWith("dL")) {
+      const day = dayOfWeek.substring(2);
+      dayOfWeekText = `the last ${day} of the month`;
+    } else if (dayOfWeek.startsWith("DDDL")) {
+      const day = dayOfWeek.substring(4);
+      dayOfWeekText = `the last ${day} of the month`;
+    } else {
+      dayOfWeekText = dayOfWeek;
+    }
+
+    return dayOfWeekText;
+  }
+
   for (let i = 0; i < 6; i++) {
     const field = cronFields[i];
     const fieldName = [cronFieldNames[i]];
