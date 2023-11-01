@@ -103,7 +103,6 @@ function translateSpringCronExpression(expression) {
     return dayOfMonthText;
   }
 
-  //TODO:  Replace #2 with  2nd Friday in the month
   function handleWeek(dayOfWeek) {
     let offsetStr = null;
     if (dayOfWeek.includes("#")) {
@@ -171,13 +170,11 @@ function translateSpringCronExpression(expression) {
 }
 
 // Example usage:
-const cronExpression = "0 0 0 ? * MON#2"; // Sample Spring cron expression
+const cronExpression = "0 0 0 ? * MON#2"; 
 const humanReadable = translateSpringCronExpression(cronExpression);
-console.log(humanReadable); // Output the human-readable description
+console.log(humanReadable); 
 
 // TODO :
 // Fix L character issues :
-// The "day of month" and "day of week" fields can contain a L-character, which stands for "last", and has a different meaning in each field:
 // In the "day of month" field, L stands for "the last day of the month". If followed by an negative offset (i.e. L-n), it means "nth-to-last day of the month". If followed by W (i.e. LW), it means "the last weekday of the month".
 // The "day of month" field can be nW, which stands for "the nearest weekday to day of the month n". If n falls on Saturday, this yields the Friday before it. If n falls on Sunday, this yields the Monday after, which also happens if n is 1 and falls on a Saturday (i.e. 1W stands for "the first weekday of the month").
-// The "day of week" field can be d#n (or DDD#n), which stands for "the n-th day of week d (or DDD) in the month".
