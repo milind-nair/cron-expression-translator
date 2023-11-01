@@ -105,20 +105,31 @@ function translateSpringCronExpression(expression) {
 
   //TODO:  Replace #2 with  2nd Friday in the month
   function handleWeek(dayOfWeek) {
+    let offsetStr = null;
+    if (dayOfWeek.includes("#")) {
+      let strArray = dayOfWeek.split("#");
+      let offsetNum = parseInt(strArray[1]);
+      offsetStr = `the ${offsetNum}${getNumberSuffix(offsetNum)}`;
+      dayOfWeek = strArray[0];
+    }
     let dayOfWeekText = "";
     if (dayOfWeek.length <= 2) {
       if (dayOfWeek.includes("L")) {
         const day = dayMap[parseInt(dayOfWeek.substring(0, 1))];
         dayOfWeekText = `the last ${day} of the month`;
       } else {
-        dayOfWeekText = `On ${dayMap[parseInt(dayOfWeek)]}`;
+        dayOfWeekText = `On ${offsetStr ? offsetStr : ""} ${
+          dayMap[parseInt(dayOfWeek)]
+        }`;
       }
     } else if (dayOfWeek.length > 2) {
       if (dayOfWeek.includes("L")) {
         const day = getFullDayName(dayOfWeek.substring(0, 2));
         dayOfWeekText = `the last ${day} of the month`;
       } else {
-        dayOfWeekText = `On ${getFullDayName(dayOfWeek)}`;
+        dayOfWeekText = `On ${offsetStr ? offsetStr : ""} ${getFullDayName(
+          dayOfWeek
+        )}`;
       }
     }
     return dayOfWeekText;
@@ -160,7 +171,7 @@ function translateSpringCronExpression(expression) {
 }
 
 // Example usage:
-const cronExpression = "0 0 0 ? * MON"; // Sample Spring cron expression
+const cronExpression = "0 0 0 ? * MON#2"; // Sample Spring cron expression
 const humanReadable = translateSpringCronExpression(cronExpression);
 console.log(humanReadable); // Output the human-readable description
 
