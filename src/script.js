@@ -118,6 +118,12 @@ function translateSpringCronExpression(expression) {
       dayOfMonthText = `${offset} day of the month from the end`;
     } else if (dayOfMonth === "LW") {
       dayOfMonthText = "the last weekday of the month";
+    } else if (dayOfMonth.includes("W")) {
+      let weekday = parseInt(dayOfMonth.substring(0, 1));
+
+      dayOfMonthText = `the nearest weekday to the ${weekday}${getNumberSuffix(
+        weekday
+      )} day of the month`;
     } else {
       dayOfMonthText = `In ${monthMap[parseInt(dayOfMonth) - 1]}`;
     }
@@ -190,9 +196,6 @@ function translateSpringCronExpression(expression) {
 }
 
 // Example usage:
-const cronExpression = "0 0 0 ? 1 MON#2";
+const cronExpression = "0 0 0 ? 1W MON#2";
 const humanReadable = translateSpringCronExpression(cronExpression);
 console.log(humanReadable);
-
-// TODO :
-// The "day of month" field can be nW, which stands for "the nearest weekday to day of the month n". If n falls on Saturday, this yields the Friday before it. If n falls on Sunday, this yields the Monday after, which also happens if n is 1 and falls on a Saturday (i.e. 1W stands for "the first weekday of the month").
