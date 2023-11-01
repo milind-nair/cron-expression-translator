@@ -18,6 +18,21 @@ function translateSpringCronExpression(expression) {
     "Saturday",
     "Sunday",
   ];
+
+  const monthMap = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
   function getFullDayName(shortDay) {
     shortDay = shortDay.toLowerCase();
     for (let i = 0; i < dayMap.length; i++) {
@@ -81,10 +96,16 @@ function translateSpringCronExpression(expression) {
       `${field}${getNumberSuffix(parseInt(field))} ${fieldName[0]}`
     );
   }
+  function handleComma(field, fieldName) {
+    const values = field.split(",");
+    fieldName.push("At");
+    fieldName.push(values.join(" and "));
+    fieldName.push(`${fieldName[0]}s`);
+  }
 
   function offsetToText(offset) {
     if (offset === 1 || offset === -1) return "the last";
-    if (offset > 1) return `the ${offset}th-to-last`;
+    if (offset > 1) return `the ${offset}${getNumberSuffix(offset)}-to-last`;
     return offset;
   }
 
@@ -93,12 +114,12 @@ function translateSpringCronExpression(expression) {
     if (dayOfMonth === "L") {
       dayOfMonthText = "the last day of the month";
     } else if (dayOfMonth.startsWith("L-")) {
-      const offset = offsetToText(-parseInt(dayOfMonth.substring(2)));
+      const offset = offsetToText(parseInt(dayOfMonth.substring(2)));
       dayOfMonthText = `${offset} day of the month from the end`;
     } else if (dayOfMonth === "LW") {
       dayOfMonthText = "the last weekday of the month";
     } else {
-      dayOfMonthText = parseInt(dayOfMonth);
+      dayOfMonthText = `In ${monthMap[parseInt(dayOfMonth) - 1]}`;
     }
     return dayOfMonthText;
   }
@@ -140,6 +161,8 @@ function translateSpringCronExpression(expression) {
     const fieldName = [cronFieldNames[i]];
     if (i === 5) {
       fieldName.push(handleWeek(field));
+    } else if (i === 4) {
+      fieldName.push(handleMonth(field));
     } else {
       if (field === "*" || field === "?") {
         handleAsterisk(fieldName);
@@ -148,10 +171,7 @@ function translateSpringCronExpression(expression) {
       } else if (field.includes("-")) {
         handleRange(field, fieldName);
       } else if (field.includes(",")) {
-        const values = field.split(",");
-        fieldName.push("At");
-        fieldName.push(values.join(" and "));
-        fieldName.push(`${fieldName[0]}s`);
+        handleComma(field, fieldName);
       } else {
         handleNumeric(field, fieldName);
         if (parseInt(field) === 0) exclude = true;
@@ -170,11 +190,9 @@ function translateSpringCronExpression(expression) {
 }
 
 // Example usage:
-const cronExpression = "0 0 0 ? * MON#2"; 
+const cronExpression = "0 0 0 ? 1 MON#2";
 const humanReadable = translateSpringCronExpression(cronExpression);
-console.log(humanReadable); 
+console.log(humanReadable);
 
 // TODO :
-// Fix L character issues :
-// In the "day of month" field, L stands for "the last day of the month". If followed by an negative offset (i.e. L-n), it means "nth-to-last day of the month". If followed by W (i.e. LW), it means "the last weekday of the month".
 // The "day of month" field can be nW, which stands for "the nearest weekday to day of the month n". If n falls on Saturday, this yields the Friday before it. If n falls on Sunday, this yields the Monday after, which also happens if n is 1 and falls on a Saturday (i.e. 1W stands for "the first weekday of the month").
