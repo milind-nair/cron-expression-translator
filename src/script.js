@@ -111,6 +111,7 @@ function translateSpringCronExpression(expression) {
 
   function handleMonth(dayOfMonth) {
     let dayOfMonthText = "";
+    if (dayOfMonth === "*") return "Every Month";
     if (dayOfMonth === "L") {
       dayOfMonthText = "the last day of the month";
     } else if (dayOfMonth.startsWith("L-")) {
@@ -132,6 +133,7 @@ function translateSpringCronExpression(expression) {
 
   function handleWeek(dayOfWeek) {
     let offsetStr = null;
+    if (dayOfWeek === "*") return `Any day of the week`;
     if (dayOfWeek.includes("#")) {
       let strArray = dayOfWeek.split("#");
       let offsetNum = parseInt(strArray[1]);
@@ -196,6 +198,7 @@ function translateSpringCronExpression(expression) {
 }
 
 // Example usage:
-const cronExpression = "0 0 0 ? 1W MON#2";
+const cronExpression = "0 0 9-17 * * MON";
 const humanReadable = translateSpringCronExpression(cronExpression);
 console.log(humanReadable);
+
