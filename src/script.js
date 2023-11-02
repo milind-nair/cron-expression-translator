@@ -109,9 +109,10 @@ function translateSpringCronExpression(expression) {
     return offset;
   }
 
-  function handleMonth(dayOfMonth) {
+  function handleDayOfMonth(dayOfMonth) {
     let dayOfMonthText = "";
-    if (dayOfMonth === "*") return "Every Month";
+    if (dayOfMonth === "*" || dayOfMonth === "?")
+      return "Every day of the Month";
     if (dayOfMonth === "L") {
       dayOfMonthText = "the last day of the month";
     } else if (dayOfMonth.startsWith("L-")) {
@@ -133,7 +134,7 @@ function translateSpringCronExpression(expression) {
 
   function handleWeek(dayOfWeek) {
     let offsetStr = null;
-    if (dayOfWeek === "*") return `Any day of the week`;
+    if (dayOfWeek === "*" || dayOfWeek === "?") return `Any day of the week`;
     if (dayOfWeek.includes("#")) {
       let strArray = dayOfWeek.split("#");
       let offsetNum = parseInt(strArray[1]);
@@ -169,8 +170,8 @@ function translateSpringCronExpression(expression) {
     const fieldName = [cronFieldNames[i]];
     if (i === 5) {
       fieldName.push(handleWeek(field));
-    } else if (i === 4) {
-      fieldName.push(handleMonth(field));
+    } else if (i === 3) {
+      fieldName.push(handleDayOfMonth(field));
     } else {
       if (field === "*" || field === "?") {
         handleAsterisk(fieldName);
@@ -198,7 +199,11 @@ function translateSpringCronExpression(expression) {
 }
 
 // Example usage:
-const cronExpression = "0 0 9-17 * * MON";
+const cronExpression = "0 0 0 ? * MON#1";
 const humanReadable = translateSpringCronExpression(cronExpression);
 console.log(humanReadable);
 
+// TODO : Extract each parameter call to a separate function
+// 1) MON-FRI or 3-5 in Day of Week Function
+
+// TODO : When both day of week and day of month parameters are present , give precedence to day of month (Eg :  On 25th December only if its a Friday)
