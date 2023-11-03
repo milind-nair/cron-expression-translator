@@ -1,0 +1,24 @@
+{
+  "name": "cron-expression-translator",
+  "version": "1.0.0",
+  "description": "Utility library to provide translation from Spring cron expression to human readable text",
+  "main": "test.js",
+  "scripts": {
+    "start": "cd src && node test.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/milind-nair/cron-expression-translator.git"
+  },
+  "keywords": [
+    "javascript-library",
+    "cron-expression"
+  ],
+  "author": "Milind-Nair",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/milind-nair/cron-expression-translator/issues"
+  },
+  "homepage": "https://github.com/milind-nair/cron-expression-translator#readme"
+}
