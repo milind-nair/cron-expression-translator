@@ -1,4 +1,4 @@
-function translateSpringCronExpression(expression) {
+const translateSpringCronExpression = (expression) => {
   const cronFieldNames = [
     "second",
     "minute",
@@ -196,14 +196,10 @@ function translateSpringCronExpression(expression) {
   const description = cronFieldDescriptions.join(", ");
 
   return description;
-}
-
-// Example usage:
-const cronExpression = "0 0 0 ? * MON#1";
-const humanReadable = translateSpringCronExpression(cronExpression);
-console.log(humanReadable);
+};
 
 // TODO : Extract each parameter call to a separate function
 // 1) MON-FRI or 3-5 in Day of Week Function
 
 // TODO : When both day of week and day of month parameters are present , give precedence to day of month (Eg :  On 25th December only if its a Friday)
+module.exports = translateSpringCronExpression;
