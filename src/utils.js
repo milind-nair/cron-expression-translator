@@ -1,6 +1,6 @@
 import { dayMap, monthMap, cronFieldNames } from "./constants.js";
 
-export function getFullDayName(shortDay) {
+function getFullDayName(shortDay) {
   shortDay = shortDay.toLowerCase();
   for (let i = 0; i < dayMap.length; i++) {
     if (dayMap[i].toLowerCase().startsWith(shortDay)) {
@@ -10,7 +10,7 @@ export function getFullDayName(shortDay) {
   return "Invalid day abbreviation";
 }
 
-export function getNumberSuffix(number) {
+function getNumberSuffix(number) {
   if (typeof number !== "number" || isNaN(number)) {
     return "Invalid input";
   }
@@ -35,34 +35,33 @@ export function getNumberSuffix(number) {
 }
 
 export function handleAsterisk(fieldName) {
-  fieldName.push(`Every ${fieldName[0]}`);
+  return `Every ${fieldName[0]}`;
 }
 
 export function handleRange(rangeStr, fieldName) {
   const [start, end] = rangeStr.split("-");
-  fieldName.push(
-    `From the ${start}${getNumberSuffix(
-      parseInt(start)
-    )} to ${end}${getNumberSuffix(parseInt(end))} ${fieldName[0]}`
-  );
+  return `From the ${start}${getNumberSuffix(
+    parseInt(start)
+  )} to ${end}${getNumberSuffix(parseInt(end))} ${fieldName[0]}`;
 }
 
 export function handleStep(field, fieldName) {
+  let result = "";
   const [range, step] = field.split("/");
-  if (parseInt(step) !== 1) fieldName.push(`Every ${step} ${fieldName[0]}s`);
-  else fieldName.push(`Every ${fieldName[0]}`);
+  if (parseInt(step) !== 1) result = `Every ${step} ${fieldName[0]}s`;
+  else result = `Every ${fieldName[0]}`;
   if (range.includes("-")) {
-    handleRange(range, fieldName);
+    result += handleRange(range, fieldName);
   }
 }
 export function handleNumeric(field, fieldName) {
-  fieldName.push(`${field}${getNumberSuffix(parseInt(field))} ${fieldName[0]}`);
+  return `${field}${getNumberSuffix(parseInt(field))} ${fieldName[0]}`;
 }
 export function handleComma(field, fieldName) {
   const values = field.split(",");
-  fieldName.push("At");
-  fieldName.push(values.join(" and "));
-  fieldName.push(`${fieldName[0]}s`);
+  let result = "At";
+  result += values.join(" and ") + `${fieldName[0]}s`;
+  return result;
 }
 
 export function handleWeek(dayOfWeek) {
@@ -123,4 +122,20 @@ export function handleDayOfMonth(dayOfMonth) {
     dayOfMonthText = `In ${monthMap[parseInt(dayOfMonth) - 1]}`;
   }
   return dayOfMonthText;
+}
+
+export function handleSeconds(field, fieldName) {
+  let exclude = false;
+  if (field === "*" || field === "?") {
+    handleAsterisk(fieldName);
+  } else if (field.includes("/")) {
+    handleStep(field, fieldName);
+  } else if (field.includes("-")) {
+    handleRange(field, fieldName);
+  } else if (field.includes(",")) {
+    handleComma(field, fieldName);
+  } else {
+    handleNumeric(field, fieldName);
+    if (parseInt(field) === 0) exclude = true;
+  }
 }
