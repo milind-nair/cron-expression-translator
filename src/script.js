@@ -16,28 +16,27 @@ const translateSpringCronExpression = (expression) => {
     let exclude = false;
     const field = cronFields[i];
     const fieldName = [cronFieldNames[i]];
+    let cronFieldDescription = "";
     if (i === 5) {
-      fieldName.push(handleWeek(field));
+      cronFieldDescription += handleWeek(field);
     } else if (i === 3) {
-      fieldName.push(handleDayOfMonth(field));
+      cronFieldDescription += handleDayOfMonth(field);
     } else {
       if (field === "*" || field === "?") {
-        handleAsterisk(fieldName);
+        cronFieldDescription += handleAsterisk(fieldName);
       } else if (field.includes("/")) {
-        handleStep(field, fieldName);
+        cronFieldDescription += handleStep(field, fieldName);
       } else if (field.includes("-")) {
-        handleRange(field, fieldName);
+        cronFieldDescription += handleRange(field, fieldName);
       } else if (field.includes(",")) {
-        handleComma(field, fieldName);
+        cronFieldDescription += handleComma(field, fieldName);
       } else {
-        handleNumeric(field, fieldName);
+        cronFieldDescription += handleNumeric(field, fieldName);
         if (parseInt(field) === 0) exclude = true;
       }
     }
-
     if (!exclude) {
-      fieldName[0] = fieldName.slice(1).join(" ");
-      cronFieldDescriptions.push(fieldName[0]);
+      cronFieldDescriptions.push(cronFieldDescription);
     }
   }
 
