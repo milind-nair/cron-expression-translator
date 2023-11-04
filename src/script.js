@@ -5,37 +5,40 @@ import {
   handleDayOfMonth,
   handleNumeric,
   handleRange,
+  handleSeconds,
   handleStep,
   handleWeek,
 } from "./utils.js";
 
 const translateSpringCronExpression = (expression) => {
   const cronFieldDescriptions = [];
-  const cronFields = expression.split(" ");
+  const cronFieldValues = expression.split(" ");
   for (let i = 0; i < 6; i++) {
     let exclude = false;
-    const field = cronFields[i];
-    const fieldName = [cronFieldNames[i]];
+    const fieldValue = cronFieldValues[i];
+    const fieldName = cronFieldNames[i];
     let cronFieldDescription = "";
     if (i === 5) {
-      cronFieldDescription += handleWeek(field);
+      cronFieldDescription += handleWeek(fieldValue);
     } else if (i === 3) {
-      cronFieldDescription += handleDayOfMonth(field);
+      cronFieldDescription += handleDayOfMonth(fieldValue);
+    } else if (i === 0) {
+      cronFieldDescription += handleSeconds(fieldValue, fieldName);
     } else {
-      if (field === "*" || field === "?") {
+      if (fieldValue === "*" || fieldValue === "?") {
         cronFieldDescription += handleAsterisk(fieldName);
-      } else if (field.includes("/")) {
-        cronFieldDescription += handleStep(field, fieldName);
-      } else if (field.includes("-")) {
-        cronFieldDescription += handleRange(field, fieldName);
-      } else if (field.includes(",")) {
-        cronFieldDescription += handleComma(field, fieldName);
+      } else if (fieldValue.includes("/")) {
+        cronFieldDescription += handleStep(fieldValue, fieldName);
+      } else if (fieldValue.includes("-")) {
+        cronFieldDescription += handleRange(fieldValue, fieldName);
+      } else if (fieldValue.includes(",")) {
+        cronFieldDescription += handleComma(fieldValue, fieldName);
       } else {
-        cronFieldDescription += handleNumeric(field, fieldName);
-        if (parseInt(field) === 0) exclude = true;
+        cronFieldDescription += handleNumeric(fieldValue, fieldName);
+        if (parseInt(fieldValue) === 0) exclude = true;
       }
     }
-    if (!exclude) {
+    if (!exclude && cronFieldDescription !== "Ignore") {
       cronFieldDescriptions.push(cronFieldDescription);
     }
   }
