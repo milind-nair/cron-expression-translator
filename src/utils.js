@@ -35,32 +35,32 @@ function getNumberSuffix(number) {
 }
 
 export function handleAsterisk(fieldName) {
-  return `Every ${fieldName[0]}`;
+  return `Every ${fieldName}`;
 }
 
 export function handleRange(rangeStr, fieldName) {
   const [start, end] = rangeStr.split("-");
   return `From the ${start}${getNumberSuffix(
     parseInt(start)
-  )} to ${end}${getNumberSuffix(parseInt(end))} ${fieldName[0]}`;
+  )} to ${end}${getNumberSuffix(parseInt(end))} ${fieldName}`;
 }
 
-export function handleStep(field, fieldName) {
+export function handleStep(fieldValue, fieldName) {
   let result = "";
-  const [range, step] = field.split("/");
-  if (parseInt(step) !== 1) result = `Every ${step} ${fieldName[0]}s`;
-  else result = `Every ${fieldName[0]}`;
+  const [range, step] = fieldValue.split("/");
+  if (parseInt(step) !== 1) result = `Every ${step} ${fieldName}s`;
+  else result = `Every ${fieldName}`;
   if (range.includes("-")) {
     result += handleRange(range, fieldName);
   }
 }
-export function handleNumeric(field, fieldName) {
-  return `${field}${getNumberSuffix(parseInt(field))} ${fieldName[0]}`;
+export function handleNumeric(fieldValue, fieldName) {
+  return `${fieldValue}${getNumberSuffix(parseInt(fieldValue))} ${fieldName}`;
 }
-export function handleComma(field, fieldName) {
-  const values = field.split(",");
+export function handleComma(fieldValue, fieldName) {
+  const values = fieldValue.split(",");
   let result = "At";
-  result += values.join(" and ") + `${fieldName[0]}s`;
+  result += values.join(" and ") + `${fieldName}s`;
   return result;
 }
 
@@ -124,18 +124,36 @@ export function handleDayOfMonth(dayOfMonth) {
   return dayOfMonthText;
 }
 
-export function handleSeconds(field, fieldName) {
-  let exclude = false;
-  if (field === "*" || field === "?") {
-    handleAsterisk(fieldName);
-  } else if (field.includes("/")) {
-    handleStep(field, fieldName);
-  } else if (field.includes("-")) {
-    handleRange(field, fieldName);
-  } else if (field.includes(",")) {
-    handleComma(field, fieldName);
+export function handleSeconds(fieldValue, fieldName) {
+  let secondsText = "";
+  if (fieldValue === "*" || fieldValue === "?") {
+    secondsText = handleAsterisk(fieldName);
+  } else if (fieldValue.includes("/")) {
+    secondsText = handleStep(fieldValue, fieldName);
+  } else if (fieldValue.includes("-")) {
+    secondsText = handleRange(fieldValue, fieldName);
+  } else if (fieldValue.includes(",")) {
+    secondsText = handleComma(fieldValue, fieldName);
   } else {
-    handleNumeric(field, fieldName);
-    if (parseInt(field) === 0) exclude = true;
+    if (parseInt(fieldValue) === 0) return "Ignore";
+    secondsText = handleNumeric(fieldValue, fieldName);
   }
+  return secondsText;
+}
+
+export function handleMinutes(fieldValue, fieldName) {
+  let minutesText = "";
+  if (fieldValue === "*" || fieldValue === "?") {
+    minutesText = handleAsterisk(fieldName);
+  } else if (fieldValue.includes("/")) {
+    minutesText = handleStep(fieldValue, fieldName);
+  } else if (fieldValue.includes("-")) {
+    minutesText = handleRange(fieldValue, fieldName);
+  } else if (fieldValue.includes(",")) {
+    minutesText = handleComma(fieldValue, fieldName);
+  } else {
+    if (parseInt(fieldValue) === 0) return "Ignore";
+    minutesText = handleNumeric(fieldValue, fieldName);
+  }
+  return minutesText;
 }
