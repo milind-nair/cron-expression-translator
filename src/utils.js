@@ -1,6 +1,6 @@
 import { dayMap, monthMap, cronFieldNames } from "./constants.js";
 
-function getFullDayName(shortDay) {
+export function getFullDayName(shortDay) {
   shortDay = shortDay.toLowerCase();
   for (let i = 0; i < dayMap.length; i++) {
     if (dayMap[i].toLowerCase().startsWith(shortDay)) {
@@ -10,7 +10,7 @@ function getFullDayName(shortDay) {
   return "Invalid day abbreviation";
 }
 
-function getNumberSuffix(number) {
+export function getNumberSuffix(number) {
   if (typeof number !== "number" || isNaN(number)) {
     return "Invalid input";
   }
@@ -53,14 +53,18 @@ export function handleStep(fieldValue, fieldName) {
   if (range.includes("-")) {
     result += handleRange(range, fieldName);
   }
+  return result;
 }
 export function handleNumeric(fieldValue, fieldName) {
   return `${fieldValue}${getNumberSuffix(parseInt(fieldValue))} ${fieldName}`;
 }
 export function handleComma(fieldValue, fieldName) {
-  const values = fieldValue.split(",");
-  let result = "At";
-  result += values.join(" and ") + `${fieldName}s`;
+  const values = fieldValue
+    .split(",")
+    .map((val) => val + getNumberSuffix(parseInt(val)));
+
+  let result = "At ";
+  result +=  values.slice(0, -1).join(", ") + " and " + values.slice(-1) + ` ${fieldName}s`
   return result;
 }
 
@@ -79,7 +83,7 @@ export function handleWeek(dayOfWeek) {
       const day = dayMap[parseInt(dayOfWeek.substring(0, 1))];
       dayOfWeekText = `the last ${day} of the month`;
     } else {
-      dayOfWeekText = `On ${offsetStr ? offsetStr : ""} ${
+      dayOfWeekText = `On ${offsetStr ? offsetStr+" " : ""}${
         dayMap[parseInt(dayOfWeek)]
       }`;
     }
@@ -88,7 +92,7 @@ export function handleWeek(dayOfWeek) {
       const day = getFullDayName(dayOfWeek.substring(0, 2));
       dayOfWeekText = `the last ${day} of the month`;
     } else {
-      dayOfWeekText = `On ${offsetStr ? offsetStr : ""} ${getFullDayName(
+      dayOfWeekText = `On ${offsetStr ? offsetStr+" " : ""}${getFullDayName(
         dayOfWeek
       )}`;
     }
@@ -135,7 +139,7 @@ export function handleSeconds(fieldValue, fieldName) {
   } else if (fieldValue.includes(",")) {
     secondsText = handleComma(fieldValue, fieldName);
   } else {
-    if (parseInt(fieldValue) === 0) return "Ignore";
+    if (parseInt(fieldValue) === 0) return null;
     secondsText = handleNumeric(fieldValue, fieldName);
   }
   return secondsText;
@@ -152,7 +156,7 @@ export function handleMinutes(fieldValue, fieldName) {
   } else if (fieldValue.includes(",")) {
     minutesText = handleComma(fieldValue, fieldName);
   } else {
-    if (parseInt(fieldValue) === 0) return "Ignore";
+    if (parseInt(fieldValue) === 0) return null;
     minutesText = handleNumeric(fieldValue, fieldName);
   }
   return minutesText;

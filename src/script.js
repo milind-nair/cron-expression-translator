@@ -11,38 +11,36 @@ import {
 } from "./utils.js";
 
 const translateSpringCronExpression = (expression) => {
-  const cronFieldDescriptions = [];
   const cronFieldValues = expression.split(" ");
-  for (let i = 0; i < 6; i++) {
-    let exclude = false;
-    const fieldValue = cronFieldValues[i];
-    const fieldName = cronFieldNames[i];
-    let cronFieldDescription = "";
-    if (i === 5) {
-      cronFieldDescription += handleWeek(fieldValue);
-    } else if (i === 3) {
-      cronFieldDescription += handleDayOfMonth(fieldValue);
-    } else if (i === 0) {
-      cronFieldDescription += handleSeconds(fieldValue, fieldName);
-    } else {
-      if (fieldValue === "*" || fieldValue === "?") {
-        cronFieldDescription += handleAsterisk(fieldName);
-      } else if (fieldValue.includes("/")) {
-        cronFieldDescription += handleStep(fieldValue, fieldName);
-      } else if (fieldValue.includes("-")) {
-        cronFieldDescription += handleRange(fieldValue, fieldName);
-      } else if (fieldValue.includes(",")) {
-        cronFieldDescription += handleComma(fieldValue, fieldName);
-      } else {
-        cronFieldDescription += handleNumeric(fieldValue, fieldName);
-        if (parseInt(fieldValue) === 0) exclude = true;
+  const handleCronField = (fieldValue, fieldName, index) => {
+    
+    const handlers = {
+      0: () => handleSeconds(fieldValue, fieldName),
+      3: () => handleDayOfMonth(fieldValue),
+      5: () => handleWeek(fieldValue),
+      default: () => {
+        if (fieldValue === "*" || fieldValue === "?") {
+          return handleAsterisk(fieldName);
+        } else if (fieldValue.includes("/")) {
+          return handleStep(fieldValue, fieldName); 
+        } else if (fieldValue.includes("-")) {
+          return handleRange(fieldValue, fieldName);
+        } else if (fieldValue.includes(",")) {
+          return handleComma(fieldValue, fieldName);
+        } else {
+          const description = handleNumeric(fieldValue, fieldName);
+          return parseInt(fieldValue) === 0 ? null : description;
+        }
       }
-    }
-    if (!exclude && cronFieldDescription !== "Ignore") {
-      cronFieldDescriptions.push(cronFieldDescription);
-    }
-  }
-
+    };
+  
+    const handler = handlers[index] || handlers.default;
+    return handler();
+  };
+  
+  const cronFieldDescriptions = cronFieldValues
+    .map((value, index) => handleCronField(value, cronFieldNames[index], index))
+    .filter(description => description !== null);
   const description = cronFieldDescriptions.join(", ");
 
   return description;
