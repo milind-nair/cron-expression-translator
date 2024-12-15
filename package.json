@@ -1,7 +1,7 @@
 {
   "name": "cron-expression-translator",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Utility library to provide translation from Spring cron expression to human readable text",
   "main": "test.js",
   "scripts": {
