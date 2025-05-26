@@ -8,6 +8,11 @@ import {
   handleSeconds,
   handleStep,
   handleWeek,
+  handleMinutes,
+  handleHours,
+  handleDayOfMonthField,
+  handleMonth,
+  handleDayOfWeek,
 } from "./utils.js";
 
 const translateSpringCronExpression = (expression) => {
@@ -16,13 +21,16 @@ const translateSpringCronExpression = (expression) => {
     
     const handlers = {
       0: () => handleSeconds(fieldValue, fieldName),
-      3: () => handleDayOfMonth(fieldValue),
-      5: () => handleWeek(fieldValue),
+      1: () => handleMinutes(fieldValue, fieldName),
+      2: () => handleHours(fieldValue, fieldName),
+      3: () => handleDayOfMonthField(fieldValue, fieldName),
+      4: () => handleMonth(fieldValue, fieldName),
+      5: () => handleDayOfWeek(fieldValue, fieldName),
       default: () => {
         if (fieldValue === "*" || fieldValue === "?") {
           return handleAsterisk(fieldName);
         } else if (fieldValue.includes("/")) {
-          return handleStep(fieldValue, fieldName); 
+          return handleStep(fieldValue, fieldName);
         } else if (fieldValue.includes("-")) {
           return handleRange(fieldValue, fieldName);
         } else if (fieldValue.includes(",")) {
@@ -41,13 +49,26 @@ const translateSpringCronExpression = (expression) => {
   const cronFieldDescriptions = cronFieldValues
     .map((value, index) => handleCronField(value, cronFieldNames[index], index))
     .filter(description => description !== null);
-  const description = cronFieldDescriptions.join(", ");
+
+  let description = cronFieldDescriptions.join(", ");
+
+  // Handle precedence for Day of Month and Day of Week
+  const dayOfMonthIndex = 3;
+  const dayOfWeekIndex = 5;
+
+  const dayOfMonthValue = cronFieldValues[dayOfMonthIndex];
+  const dayOfWeekValue = cronFieldValues[dayOfWeekIndex];
+
+  if (dayOfMonthValue !== "?" && dayOfWeekValue !== "?") {
+    const dayOfMonthDesc = handleDayOfMonth(dayOfMonthValue);
+    const dayOfWeekDesc = handleWeek(dayOfWeekValue);
+
+    if (dayOfMonthDesc && dayOfWeekDesc) {
+      description = `${dayOfMonthDesc} only if it's a ${dayOfWeekDesc.replace("On ", "")}`;
+    }
+  }
 
   return description;
 };
 
-// TODO : Extract each parameter call to a separate function
-// 1) MON-FRI or 3-5 in Day of Week Function
-
-// TODO : When both day of week and day of month parameters are present , give precedence to day of month (Eg :  On 25th December only if its a Friday)
 export default translateSpringCronExpression;

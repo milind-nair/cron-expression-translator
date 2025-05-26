@@ -161,3 +161,71 @@ export function handleMinutes(fieldValue, fieldName) {
   }
   return minutesText;
 }
+
+export function handleHours(fieldValue, fieldName) {
+  let hoursText = "";
+  if (fieldValue === "*" || fieldValue === "?") {
+    hoursText = handleAsterisk(fieldName);
+  } else if (fieldValue.includes("/")) {
+    hoursText = handleStep(fieldValue, fieldName);
+  } else if (fieldValue.includes("-")) {
+    hoursText = handleRange(fieldValue, fieldName);
+  } else if (fieldValue.includes(",")) {
+    hoursText = handleComma(fieldValue, fieldName);
+  } else {
+    if (parseInt(fieldValue) === 0) return null;
+    hoursText = handleNumeric(fieldValue, fieldName);
+  }
+  return hoursText;
+}
+
+export function handleDayOfMonthField(fieldValue, fieldName) {
+  let dayOfMonthText = "";
+  if (fieldValue === "*" || fieldValue === "?") {
+    dayOfMonthText = handleAsterisk(fieldName);
+  } else if (fieldValue.includes("/")) {
+    dayOfMonthText = handleStep(fieldValue, fieldName);
+  } else if (fieldValue.includes("-")) {
+    dayOfMonthText = handleRange(fieldValue, fieldName);
+  } else if (fieldValue.includes(",")) {
+    dayOfMonthText = handleComma(fieldValue, fieldName);
+  } else {
+    if (parseInt(fieldValue) === 0) return null;
+    dayOfMonthText = handleNumeric(fieldValue, fieldName);
+  }
+  return dayOfMonthText;
+}
+
+export function handleMonth(fieldValue, fieldName) {
+  let monthText = "";
+  if (fieldValue === "*" || fieldValue === "?") {
+    monthText = handleAsterisk(fieldName);
+  } else if (fieldValue.includes("/")) {
+    monthText = handleStep(fieldValue, fieldName);
+  } else if (fieldValue.includes("-")) {
+    monthText = handleRange(fieldValue, fieldName);
+  } else if (fieldValue.includes(",")) {
+    monthText = handleComma(fieldValue, fieldName);
+  } else {
+    if (parseInt(fieldValue) === 0) return null;
+    monthText = handleNumeric(fieldValue, fieldName);
+  }
+  return monthText;
+}
+
+export function handleDayOfWeek(fieldValue, fieldName) {
+  let dayOfWeekText = "";
+  if (fieldValue === "*" || fieldValue === "?") {
+    dayOfWeekText = handleAsterisk(fieldName);
+  } else if (fieldValue.includes("/")) {
+    dayOfWeekText = handleStep(fieldValue, fieldName);
+  } else if (fieldValue.includes("-")) {
+    dayOfWeekText = handleRange(fieldValue, fieldName);
+  } else if (fieldValue.includes(",")) {
+    dayOfWeekText = handleComma(fieldValue, fieldName);
+  } else {
+    if (parseInt(fieldValue) === 0) return null;
+    dayOfWeekText = handleNumeric(fieldValue, fieldName);
+  }
+  return dayOfWeekText;
+}
