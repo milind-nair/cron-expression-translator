@@ -40,37 +40,119 @@ export function handleAsterisk(fieldName) {
 
 export function handleRange(rangeStr, fieldName) {
   const [start, end] = rangeStr.split("-");
+  const startVal = parseInt(start);
+  const endVal = parseInt(end);
+
+  if (fieldName === "day of the week") {
+    return `${dayMap[startVal]} through ${dayMap[endVal]}`;
+  } else if (fieldName === "day of the month") {
+    return `on day ${startVal} through ${endVal}`;
+  }
   return `From the ${start}${getNumberSuffix(
-    parseInt(start)
-  )} to ${end}${getNumberSuffix(parseInt(end))} ${fieldName}`;
+    startVal
+  )} to ${end}${getNumberSuffix(endVal)} ${fieldName}`;
 }
 
 export function handleStep(fieldValue, fieldName) {
-  let result = "";
   const [range, step] = fieldValue.split("/");
-  if (parseInt(step) !== 1) result = `Every ${step} ${fieldName}s`;
-  else result = `Every ${fieldName}`;
-  if (range.includes("-")) {
-    result += handleRange(range, fieldName);
+  const stepNum = parseInt(step);
+  let result = "";
+
+  if (fieldName === "day of the month") {
+    result = `every ${stepNum}${getNumberSuffix(stepNum)} day`;
+    if (range.includes("-")) {
+      const [startRange, endRange] = range.split("-");
+      result += `, on day ${startRange} through ${endRange}`;
+    }
+    result += ` of the month`;
+  } else if (fieldName === "month") {
+    result = `Every ${stepNum} months`;
+    if (range.includes("-")) {
+      const [startRange, endRange] = range.split("-");
+      result += `, only in ${monthMap[parseInt(startRange) - 1]} through ${
+        monthMap[parseInt(endRange) - 1]
+      }`;
+    }
+  } else if (fieldName === "day of the week") {
+    result = `every ${stepNum}${getNumberSuffix(stepNum)} day of the week`;
+    if (range.includes("-")) {
+      const [startRange, endRange] = range.split("-");
+      result += `, ${dayMap[parseInt(startRange)]} through ${
+        dayMap[parseInt(endRange)]
+      }`;
+    }
+  } else {
+    result = `Every ${stepNum} ${fieldName}s`;
+    if (range.includes("-")) {
+      const [startRange, endRange] = range.split("-");
+      result += `From the ${startRange}${getNumberSuffix(
+        parseInt(startRange)
+      )} to ${endRange}${getNumberSuffix(parseInt(endRange))} ${fieldName}`;
+    }
   }
   return result;
 }
-export function handleNumeric(fieldValue, fieldName) {
-  return `${fieldValue}${getNumberSuffix(parseInt(fieldValue))} ${fieldName}`;
-}
-export function handleComma(fieldValue, fieldName) {
-  const values = fieldValue
-    .split(",")
-    .map((val) => val + getNumberSuffix(parseInt(val)));
 
-  let result = "At ";
-  result +=  values.slice(0, -1).join(", ") + " and " + values.slice(-1) + ` ${fieldName}s`
+export function handleNumeric(fieldValue, fieldName) {
+  const numValue = parseInt(fieldValue);
+  if (fieldName === "month") {
+    return `only in ${monthMap[numValue - 1]}`;
+  } else if (fieldName === "day of the week") {
+    return `only on ${dayMap[numValue]}`;
+  } else if (fieldName === "day of the month") {
+    return `on day ${numValue}`;
+  }
+  return `${numValue}${getNumberSuffix(numValue)} ${fieldName}`;
+}
+
+export function handleComma(fieldValue, fieldName) {
+  const values = fieldValue.split(",").map((val) => {
+    const numVal = parseInt(val);
+    if (fieldName === "day of the week") {
+      return dayMap[numVal];
+    } else if (fieldName === "day of the month") {
+      return `day ${numVal}`;
+    } else if (fieldName === "month") {
+      return monthMap[numVal - 1];
+    }
+    return `${numVal}${getNumberSuffix(numVal)}`;
+  });
+
+  let result = "";
+  if (fieldName === "day of the month") {
+    result = "on ";
+  } else if (fieldName === "month") {
+    result = "only in ";
+  } else if (fieldName === "day of the week") {
+    result = "only on ";
+  } else {
+    result = "At ";
+  }
+
+  if (values.length > 1) {
+    result += values.slice(0, -1).join(", ") + " and " + values.slice(-1);
+  } else {
+    result += values[0];
+  }
+
+  if (
+    (fieldName === "minute" || fieldName === "hour" || fieldName === "second") &&
+    values.length === 1
+  ) {
+    result += ` ${fieldName}`;
+  } else if (
+    fieldName !== "day of the month" &&
+    fieldName !== "month" &&
+    fieldName !== "day of the week"
+  ) {
+    result += ` ${fieldName}s`;
+  }
   return result;
 }
 
 export function handleWeek(dayOfWeek) {
   let offsetStr = null;
-  if (dayOfWeek === "*" || dayOfWeek === "?") return `Any day of the week`;
+  if (dayOfWeek === "*" || dayOfWeek === "?" || dayOfWeek.startsWith("L-")) return `Any day of the week`;
   if (dayOfWeek.includes("#")) {
     let strArray = dayOfWeek.split("#");
     let offsetNum = parseInt(strArray[1]);
@@ -78,37 +160,33 @@ export function handleWeek(dayOfWeek) {
     dayOfWeek = strArray[0];
   }
   let dayOfWeekText = "";
-  if (dayOfWeek.length <= 2) {
-    if (dayOfWeek.includes("L")) {
+  if (dayOfWeek.includes("L")) {
+    if (dayOfWeek.length === 1) {
+      dayOfWeekText = "the last day of the week of the month";
+    } else if (dayOfWeek.length === 2) {
       const day = dayMap[parseInt(dayOfWeek.substring(0, 1))];
       dayOfWeekText = `the last ${day} of the month`;
     } else {
-      dayOfWeekText = `On ${offsetStr ? offsetStr+" " : ""}${
-        dayMap[parseInt(dayOfWeek)]
-      }`;
-    }
-  } else if (dayOfWeek.length > 2) {
-    if (dayOfWeek.includes("L")) {
-      const day = getFullDayName(dayOfWeek.substring(0, 2));
+      const day = getFullDayName(dayOfWeek.substring(0, dayOfWeek.length - 1));
       dayOfWeekText = `the last ${day} of the month`;
-    } else {
-      dayOfWeekText = `On ${offsetStr ? offsetStr+" " : ""}${getFullDayName(
-        dayOfWeek
-      )}`;
     }
+  } else {
+    dayOfWeekText = `On ${offsetStr ? offsetStr + " " : ""}${
+      dayMap[parseInt(dayOfWeek)] || getFullDayName(dayOfWeek)
+    }`;
   }
   return dayOfWeekText;
 }
 
 function offsetToText(offset) {
-  if (offset === 1 || offset === -1) return "the last";
+  if (offset === 1) return "the last";
   if (offset > 1) return `the ${offset}${getNumberSuffix(offset)}-to-last`;
   return offset;
 }
 
 export function handleDayOfMonth(dayOfMonth) {
   let dayOfMonthText = "";
-  if (dayOfMonth === "*" || dayOfMonth === "?") return "Every day of the Month";
+  if (dayOfMonth === "*" || dayOfMonth === "?") return "Every day of the month";
   if (dayOfMonth === "L") {
     dayOfMonthText = "the last day of the month";
   } else if (dayOfMonth.startsWith("L-")) {
@@ -117,115 +195,102 @@ export function handleDayOfMonth(dayOfMonth) {
   } else if (dayOfMonth === "LW") {
     dayOfMonthText = "the last weekday of the month";
   } else if (dayOfMonth.includes("W")) {
-    let weekday = parseInt(dayOfMonth.substring(0, 1));
+    let weekday = parseInt(dayOfMonth.substring(0, dayOfMonth.length - 1));
 
     dayOfMonthText = `the nearest weekday to the ${weekday}${getNumberSuffix(
       weekday
     )} day of the month`;
   } else {
-    dayOfMonthText = `In ${monthMap[parseInt(dayOfMonth) - 1]}`;
+    dayOfMonthText = `on day ${parseInt(dayOfMonth)}`;
   }
   return dayOfMonthText;
 }
 
 export function handleSeconds(fieldValue, fieldName) {
-  let secondsText = "";
+  if (fieldValue === "0") return null;
   if (fieldValue === "*" || fieldValue === "?") {
-    secondsText = handleAsterisk(fieldName);
+    return handleAsterisk(fieldName);
   } else if (fieldValue.includes("/")) {
-    secondsText = handleStep(fieldValue, fieldName);
+    return handleStep(fieldValue, fieldName);
   } else if (fieldValue.includes("-")) {
-    secondsText = handleRange(fieldValue, fieldName);
+    return handleRange(fieldValue, fieldName);
   } else if (fieldValue.includes(",")) {
-    secondsText = handleComma(fieldValue, fieldName);
+    return handleComma(fieldValue, fieldName);
   } else {
-    if (parseInt(fieldValue) === 0) return null;
-    secondsText = handleNumeric(fieldValue, fieldName);
+    return handleNumeric(fieldValue, fieldName);
   }
-  return secondsText;
 }
 
 export function handleMinutes(fieldValue, fieldName) {
-  let minutesText = "";
+  if (fieldValue === "0") return null;
   if (fieldValue === "*" || fieldValue === "?") {
-    minutesText = handleAsterisk(fieldName);
+    return handleAsterisk(fieldName);
   } else if (fieldValue.includes("/")) {
-    minutesText = handleStep(fieldValue, fieldName);
+    return handleStep(fieldValue, fieldName);
   } else if (fieldValue.includes("-")) {
-    minutesText = handleRange(fieldValue, fieldName);
+    return handleRange(fieldValue, fieldName);
   } else if (fieldValue.includes(",")) {
-    minutesText = handleComma(fieldValue, fieldName);
+    return handleComma(fieldValue, fieldName);
   } else {
-    if (parseInt(fieldValue) === 0) return null;
-    minutesText = handleNumeric(fieldValue, fieldName);
+    return handleNumeric(fieldValue, fieldName);
   }
-  return minutesText;
 }
 
 export function handleHours(fieldValue, fieldName) {
-  let hoursText = "";
+  if (fieldValue === "0") return null;
   if (fieldValue === "*" || fieldValue === "?") {
-    hoursText = handleAsterisk(fieldName);
+    return handleAsterisk(fieldName);
   } else if (fieldValue.includes("/")) {
-    hoursText = handleStep(fieldValue, fieldName);
+    return handleStep(fieldValue, fieldName);
   } else if (fieldValue.includes("-")) {
-    hoursText = handleRange(fieldValue, fieldName);
+    return handleRange(fieldValue, fieldName);
   } else if (fieldValue.includes(",")) {
-    hoursText = handleComma(fieldValue, fieldName);
+    return handleComma(fieldValue, fieldName);
   } else {
-    if (parseInt(fieldValue) === 0) return null;
-    hoursText = handleNumeric(fieldValue, fieldName);
+    return handleNumeric(fieldValue, fieldName);
   }
-  return hoursText;
 }
 
 export function handleDayOfMonthField(fieldValue, fieldName) {
-  let dayOfMonthText = "";
   if (fieldValue === "*" || fieldValue === "?") {
-    dayOfMonthText = handleAsterisk(fieldName);
+    return handleAsterisk(fieldName);
   } else if (fieldValue.includes("/")) {
-    dayOfMonthText = handleStep(fieldValue, fieldName);
+    return handleStep(fieldValue, fieldName);
   } else if (fieldValue.includes("-")) {
-    dayOfMonthText = handleRange(fieldValue, fieldName);
+    return handleRange(fieldValue, fieldName);
   } else if (fieldValue.includes(",")) {
-    dayOfMonthText = handleComma(fieldValue, fieldName);
+    return handleComma(fieldValue, fieldName);
   } else {
-    if (parseInt(fieldValue) === 0) return null;
-    dayOfMonthText = handleNumeric(fieldValue, fieldName);
+    return handleNumeric(fieldValue, fieldName);
   }
-  return dayOfMonthText;
 }
 
 export function handleMonth(fieldValue, fieldName) {
-  let monthText = "";
   if (fieldValue === "*" || fieldValue === "?") {
-    monthText = handleAsterisk(fieldName);
+    return handleAsterisk(fieldName);
   } else if (fieldValue.includes("/")) {
-    monthText = handleStep(fieldValue, fieldName);
+    return handleStep(fieldValue, fieldName);
   } else if (fieldValue.includes("-")) {
-    monthText = handleRange(fieldValue, fieldName);
+    return handleRange(fieldValue, fieldName);
   } else if (fieldValue.includes(",")) {
-    monthText = handleComma(fieldValue, fieldName);
+    return handleComma(fieldValue, fieldName);
   } else {
-    if (parseInt(fieldValue) === 0) return null;
-    monthText = handleNumeric(fieldValue, fieldName);
+    return handleNumeric(fieldValue, fieldName);
   }
-  return monthText;
 }
 
 export function handleDayOfWeek(fieldValue, fieldName) {
-  let dayOfWeekText = "";
-  if (fieldValue === "*" || fieldValue === "?") {
-    dayOfWeekText = handleAsterisk(fieldName);
+  if (fieldValue.includes("#") || fieldValue.includes("L")) {
+    return handleWeek(fieldValue);
+  } else if (fieldValue === "*" || fieldValue === "?") {
+    return handleAsterisk(fieldName);
   } else if (fieldValue.includes("/")) {
-    dayOfWeekText = handleStep(fieldValue, fieldName);
+    return handleStep(fieldValue, fieldName);
   } else if (fieldValue.includes("-")) {
-    dayOfWeekText = handleRange(fieldValue, fieldName);
+    return handleRange(fieldValue, fieldName);
   } else if (fieldValue.includes(",")) {
-    dayOfWeekText = handleComma(fieldValue, fieldName);
+    return handleComma(fieldValue, fieldName);
   } else {
-    if (parseInt(fieldValue) === 0) return null;
-    dayOfWeekText = handleNumeric(fieldValue, fieldName);
+    return handleNumeric(fieldValue, fieldName);
   }
-  return dayOfWeekText;
 }

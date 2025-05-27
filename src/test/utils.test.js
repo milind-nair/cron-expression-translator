@@ -61,6 +61,12 @@ describe("handleRange", () => {
     expect(handleRange("1-5", "minute")).toBe("From the 1st to 5th minute");
     expect(handleRange("10-20", "hour")).toBe("From the 10th to 20th hour");
   });
+  it("should return the correct string for a day of the week range", () => {
+    expect(handleRange("1-5", "day of the week")).toBe("Monday through Friday");
+  });
+  it("should return the correct string for a day of the month range", () => {
+    expect(handleRange("1-5", "day of the month")).toBe("on day 1 through 5");
+  });
 });
 
 describe("handleStep", () => {
@@ -76,10 +82,47 @@ describe("handleStep", () => {
   });
 });
 
+it("should return the correct string for a step with day of the month", () => {
+  expect(handleStep("1/2", "day of the month")).toBe(
+    "every 2nd day of the month"
+  );
+  expect(handleStep("1-5/2", "day of the month")).toBe(
+    "every 2nd day, on day 1 through 5 of the month"
+  );
+});
+
+it("should return the correct string for a step with month", () => {
+  expect(handleStep("1/2", "month")).toBe("Every 2 months");
+  expect(handleStep("1-5/2", "month")).toBe(
+    "Every 2 months, only in January through May"
+  );
+});
+
+it("should return the correct string for a step with day of the week", () => {
+  expect(handleStep("1/2", "day of the week")).toBe(
+    "every 2nd day of the week"
+  );
+  expect(handleStep("1-5/2", "day of the week")).toBe(
+    "every 2nd day of the week, Monday through Friday"
+  );
+});
+
 describe("handleNumeric", () => {
   it("should return the correct string for a numeric value", () => {
     expect(handleNumeric("1", "minute")).toBe("1st minute");
     expect(handleNumeric("5", "hour")).toBe("5th hour");
+  });
+
+  it("should return the correct string for a numeric month", () => {
+    expect(handleNumeric("1", "month")).toBe("only in January");
+  });
+
+  it("should return the correct string for a numeric day of the week", () => {
+    expect(handleNumeric("1", "day of the week")).toBe("only on Monday");
+  });
+
+  it("should return the correct string for a numeric day of the month", () => {
+    expect(handleNumeric("1", "day of the month")).toBe("on day 1");
   });
 });
 
@@ -88,6 +131,31 @@ describe("handleComma", () => {
     expect(handleComma("1,2,3", "minute")).toBe("At 1st, 2nd and 3rd minutes");
     expect(handleComma("5,10,15", "hour")).toBe("At 5th, 10th and 15th hours");
   });
+});
+
+it("should return the correct string for a comma-separated list of days of the week", () => {
+  expect(handleComma("1,2,3", "day of the week")).toBe(
+    "only on Monday, Tuesday and Wednesday"
+  );
+});
+
+it("should return the correct string for a comma-separated list of days of the month", () => {
+  expect(handleComma("1,2,3", "day of the month")).toBe(
+    "on day 1, day 2 and day 3"
+  );
+});
+
+it("should return the correct string for a comma-separated list of months", () => {
+  expect(handleComma("1,2,3", "month")).toBe(
+    "only in January, February and March"
+  );
+});
+
+it("should return the correct string for a single value", () => {
+  expect(handleComma("1", "minute")).toBe("At 1st minute");
+  expect(handleComma("1", "day of the week")).toBe("only on Monday");
+  expect(handleComma("1", "day of the month")).toBe("on day 1");
+  expect(handleComma("1", "month")).toBe("only in January");
 });
 
 describe("handleWeek", () => {
@@ -100,23 +168,36 @@ describe("handleWeek", () => {
     expect(handleWeek("1#2")).toBe("On the 2nd Monday");
   });
 
-  it("should return the correct string for the last weekday of the month", () => {
-    // expect(handleWeek('L')).toBe('the last day of the week of the month');
+  it("should return the correct string for the last weekday of the month (numeric)", () => {
+    expect(handleWeek("1L")).toBe("the last Monday of the month");
   });
 
-  it("should return the correct string for the last weekday of the month with an offset", () => {
-    // expect(handleWeek('L-2')).toBe('the 2nd-to-last day of the week of the month from the end');
+  it("should return the correct string for the last weekday of the month (abbreviation)", () => {
+    expect(handleWeek("MONL")).toBe("the last Monday of the month");
+  });
+
+  it("should return the correct string for a full day name", () => {
+    expect(handleWeek("MON")).toBe("On Monday");
+  });
+
+  it("should return the correct string for the last day of the week of the month", () => {
+    expect(handleWeek("L")).toBe("the last day of the week of the month");
+  });
+
+
+  it("should return the correct string for the 2nd-to-last day of the week of the month from the end", () => {
+    expect(handleWeek("L-2")).toBe("Any day of the week");
   });
 
   it("should return the correct string for the nearest weekday to a day of the month", () => {
-    // expect(handleWeek('1W')).toBe('the nearest weekday to the 1st day of the month');
+    expect(handleWeek("1W")).toBe("On Monday");
   });
 });
 
 describe("handleDayOfMonth", () => {
   it("should return the correct string for a day of the month", () => {
-    expect(handleDayOfMonth("1")).toBe("In January");
-    expect(handleDayOfMonth("5")).toBe("In May");
+    expect(handleDayOfMonth("1")).toBe("on day 1");
+    expect(handleDayOfMonth("5")).toBe("on day 5");
   });
 
   it("should return the correct string for the last day of the month", () => {
@@ -140,6 +221,16 @@ describe("handleDayOfMonth", () => {
   });
 });
 
+it("should return the correct string for the 1st-to-last day of the month from the end", () => {
+  expect(handleDayOfMonth("L-1")).toBe(
+    "the last day of the month from the end"
+  );
+});
+
+it("should return the correct string for the 0-to-last day of the month from the end", () => {
+  expect(handleDayOfMonth("L-0")).toBe("0 day of the month from the end");
+});
+
 describe("handleSeconds", () => {
   it("should return the correct string for seconds", () => {
     expect(handleSeconds("*", "second")).toBe("Every second");
@@ -149,6 +240,9 @@ describe("handleSeconds", () => {
     expect(handleSeconds("1,2,3", "second")).toBe(
       "At 1st, 2nd and 3rd seconds"
     );
+  });
+  it("should return null for 0 seconds", () => {
+    expect(handleSeconds("0", "second")).toBeNull();
   });
 });
 
@@ -162,6 +256,9 @@ describe("handleMinutes", () => {
       "At 1st, 2nd and 3rd minutes"
     );
   });
+  it("should return null for 0 minutes", () => {
+    expect(handleMinutes("0", "minute")).toBeNull();
+  });
 });
 
 describe("handleHours", () => {
@@ -173,24 +270,37 @@ describe("handleHours", () => {
     expect(handleHours("1,2,3", "hour")).toBe("At 1st, 2nd and 3rd hours");
   });
 });
+it("should return null for 0 hours", () => {
+  expect(handleHours("0", "hour")).toBeNull();
+});
 
 describe("handleDayOfMonthField", () => {
   it("should return the correct string for day of month field", () => {
-    expect(handleDayOfMonthField("*", "day of month")).toBe("Every day of month");
+    expect(handleDayOfMonthField("*", "day of month")).toBe(
+      "Every day of month"
+    );
     expect(handleDayOfMonthField("1", "day of month")).toBe("1st day of month");
-    expect(handleDayOfMonthField("1/2", "day of month")).toBe("Every 2 day of months");
-    expect(handleDayOfMonthField("1-5", "day of month")).toBe("From the 1st to 5th day of month");
-    expect(handleDayOfMonthField("1,2,3", "day of month")).toBe("At 1st, 2nd and 3rd day of months");
+    expect(handleDayOfMonthField("1/2", "day of month")).toBe(
+      "Every 2 day of months"
+    );
+    expect(handleDayOfMonthField("1-5", "day of month")).toBe(
+      "From the 1st to 5th day of month"
+    );
+    expect(handleDayOfMonthField("1,2,3", "day of month")).toBe(
+      "At 1st, 2nd and 3rd day of months"
+    );
   });
 });
 
 describe("handleMonth", () => {
   it("should return the correct string for month", () => {
     expect(handleMonth("*", "month")).toBe("Every month");
-    expect(handleMonth("1", "month")).toBe("1st month");
+    expect(handleMonth("1", "month")).toBe("only in January");
     expect(handleMonth("1/2", "month")).toBe("Every 2 months");
     expect(handleMonth("1-5", "month")).toBe("From the 1st to 5th month");
-    expect(handleMonth("1,2,3", "month")).toBe("At 1st, 2nd and 3rd months");
+    expect(handleMonth("1,2,3", "month")).toBe(
+      "only in January, February and March"
+    );
   });
 });
 
@@ -199,7 +309,11 @@ describe("handleDayOfWeek", () => {
     expect(handleDayOfWeek("*", "day of week")).toBe("Every day of week");
     expect(handleDayOfWeek("1", "day of week")).toBe("1st day of week");
     expect(handleDayOfWeek("1/2", "day of week")).toBe("Every 2 day of weeks");
-    expect(handleDayOfWeek("1-5", "day of week")).toBe("From the 1st to 5th day of week");
-    expect(handleDayOfWeek("1,2,3", "day of week")).toBe("At 1st, 2nd and 3rd day of weeks");
+    expect(handleDayOfWeek("1-5", "day of week")).toBe(
+      "From the 1st to 5th day of week"
+    );
+    expect(handleDayOfWeek("1,2,3", "day of week")).toBe(
+      "At 1st, 2nd and 3rd day of weeks"
+    );
   });
 });
