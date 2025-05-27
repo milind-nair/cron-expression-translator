@@ -151,59 +151,57 @@ export function handleComma(fieldValue, fieldName) {
 }
 
 export function handleWeek(dayOfWeek) {
-  let offsetStr = null;
-  if (dayOfWeek === "*" || dayOfWeek === "?" || dayOfWeek.startsWith("L-")) return `Any day of the week`;
+  if (dayOfWeek === "*" || dayOfWeek === "?") {
+    return `Every day of the week`;
+  }
+
   if (dayOfWeek.includes("#")) {
-    let strArray = dayOfWeek.split("#");
-    let offsetNum = parseInt(strArray[1]);
-    offsetStr = `the ${offsetNum}${getNumberSuffix(offsetNum)}`;
-    dayOfWeek = strArray[0];
+    const [dayNum, occurrence] = dayOfWeek.split("#");
+    const dayName = dayMap[parseInt(dayNum)] || getFullDayName(dayNum);
+    return `the ${occurrence}${getNumberSuffix(parseInt(occurrence))} ${dayName} in the month`;
   }
-  let dayOfWeekText = "";
+
   if (dayOfWeek.includes("L")) {
-    if (dayOfWeek.length === 1) {
-      dayOfWeekText = "the last day of the week of the month";
-    } else if (dayOfWeek.length === 2) {
+    if (dayOfWeek.length === 1) { // "L"
+      return "last day of the week of the month";
+    } else if (dayOfWeek.length === 2) { // e.g., "5L"
       const day = dayMap[parseInt(dayOfWeek.substring(0, 1))];
-      dayOfWeekText = `the last ${day} of the month`;
-    } else {
+      return `last ${day} of the month`;
+    } else { // e.g., "THUL"
       const day = getFullDayName(dayOfWeek.substring(0, dayOfWeek.length - 1));
-      dayOfWeekText = `the last ${day} of the month`;
+      return `last ${day} of the month`;
     }
-  } else {
-    dayOfWeekText = `On ${offsetStr ? offsetStr + " " : ""}${
-      dayMap[parseInt(dayOfWeek)] || getFullDayName(dayOfWeek)
-    }`;
   }
-  return dayOfWeekText;
+
+  // For simple numeric or named days (e.g., "1", "MON")
+  return `On ${dayMap[parseInt(dayOfWeek)] || getFullDayName(dayOfWeek)}`;
 }
 
 function offsetToText(offset) {
-  if (offset === 1) return "the last";
-  if (offset > 1) return `the ${offset}${getNumberSuffix(offset)}-to-last`;
+  if (offset === 1) return "last";
+  if (offset === 2) return "second-to-last";
+  if (offset === 3) return "third-to-last";
+  if (offset > 3) return `${offset}${getNumberSuffix(offset)}-to-last`;
   return offset;
 }
 
 export function handleDayOfMonth(dayOfMonth) {
-  let dayOfMonthText = "";
   if (dayOfMonth === "*" || dayOfMonth === "?") return "Every day of the month";
   if (dayOfMonth === "L") {
-    dayOfMonthText = "the last day of the month";
+    return "last day of the month";
   } else if (dayOfMonth.startsWith("L-")) {
     const offset = offsetToText(parseInt(dayOfMonth.substring(2)));
-    dayOfMonthText = `${offset} day of the month from the end`;
+    return `${offset} day of the month`;
   } else if (dayOfMonth === "LW") {
-    dayOfMonthText = "the last weekday of the month";
+    return "last weekday of the month";
   } else if (dayOfMonth.includes("W")) {
     let weekday = parseInt(dayOfMonth.substring(0, dayOfMonth.length - 1));
-
-    dayOfMonthText = `the nearest weekday to the ${weekday}${getNumberSuffix(
+    return `the nearest weekday to the ${weekday}${getNumberSuffix(
       weekday
     )} day of the month`;
   } else {
-    dayOfMonthText = `on day ${parseInt(dayOfMonth)}`;
+    return `on day ${parseInt(dayOfMonth)}`;
   }
-  return dayOfMonthText;
 }
 
 export function handleSeconds(fieldValue, fieldName) {

@@ -169,11 +169,11 @@ describe("handleWeek", () => {
   });
 
   it("should return the correct string for the last weekday of the month (numeric)", () => {
-    expect(handleWeek("1L")).toBe("the last Monday of the month");
+    expect(handleWeek("1L")).toBe("last Monday of the month");
   });
 
   it("should return the correct string for the last weekday of the month (abbreviation)", () => {
-    expect(handleWeek("MONL")).toBe("the last Monday of the month");
+    expect(handleWeek("MONL")).toBe("last Monday of the month");
   });
 
   it("should return the correct string for a full day name", () => {
@@ -181,7 +181,7 @@ describe("handleWeek", () => {
   });
 
   it("should return the correct string for the last day of the week of the month", () => {
-    expect(handleWeek("L")).toBe("the last day of the week of the month");
+    expect(handleWeek("L")).toBe("last day of the week of the month");
   });
 
 
@@ -201,17 +201,17 @@ describe("handleDayOfMonth", () => {
   });
 
   it("should return the correct string for the last day of the month", () => {
-    expect(handleDayOfMonth("L")).toBe("the last day of the month");
+    expect(handleDayOfMonth("L")).toBe("last day of the month");
   });
 
   it("should return the correct string for the last day of the month with an offset", () => {
     expect(handleDayOfMonth("L-2")).toBe(
-      "the 2nd-to-last day of the month from the end"
+      "second-to-last day of the month"
     );
   });
 
   it("should return the correct string for the last weekday of the month", () => {
-    expect(handleDayOfMonth("LW")).toBe("the last weekday of the month");
+    expect(handleDayOfMonth("LW")).toBe("last weekday of the month");
   });
 
   it("should return the correct string for the nearest weekday to a day of the month", () => {
@@ -223,12 +223,12 @@ describe("handleDayOfMonth", () => {
 
 it("should return the correct string for the 1st-to-last day of the month from the end", () => {
   expect(handleDayOfMonth("L-1")).toBe(
-    "the last day of the month from the end"
+    "last day of the month"
   );
 });
 
 it("should return the correct string for the 0-to-last day of the month from the end", () => {
-  expect(handleDayOfMonth("L-0")).toBe("0 day of the month from the end");
+  expect(handleDayOfMonth("L-0")).toBe("last day of the month");
 });
 
 describe("handleSeconds", () => {

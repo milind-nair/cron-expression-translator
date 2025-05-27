@@ -17,15 +17,8 @@ import {
 
 const translateSpringCronExpression = (expression) => {
   const cronFieldValues = expression.split(" ");
-  const [
-    seconds,
-    minutes,
-    hours,
-    dayOfMonth,
-    month,
-    dayOfWeek,
-    year,
-  ] = cronFieldValues;
+  const [seconds, minutes, hours, dayOfMonth, month, dayOfWeek, year] =
+    cronFieldValues;
 
   let description = "";
 
@@ -47,7 +40,12 @@ const translateSpringCronExpression = (expression) => {
       const hourNum = parseInt(hours);
       const ampm = hourNum >= 12 ? "PM" : "AM";
       const formattedHour = hourNum % 12 === 0 ? 12 : hourNum % 12;
-      description += `${formattedHour.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')} ${ampm}`;
+      description += `${formattedHour
+        .toString()
+        .padStart(2, "0")}:${minutes.padStart(2, "0")}:${seconds.padStart(
+        2,
+        "0"
+      )} ${ampm}`;
     } else {
       description += timeParts.filter(Boolean).join(", ");
     }
@@ -60,7 +58,10 @@ const translateSpringCronExpression = (expression) => {
     const dayOfMonthDesc = handleDayOfMonth(dayOfMonth, cronFieldNames[3]);
     const dayOfWeekDesc = handleWeek(dayOfWeek);
     if (dayOfMonthDesc && dayOfWeekDesc) {
-      description += `, ${dayOfMonthDesc} only if it's a ${dayOfWeekDesc.replace("On ", "")}`;
+      description += `, ${dayOfMonthDesc} only if it's a ${dayOfWeekDesc.replace(
+        "On ",
+        ""
+      )}`;
     }
   } else {
     if (dayOfMonth !== "?") {
